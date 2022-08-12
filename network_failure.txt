@@ -1,0 +1,186 @@
+transaction
+
+{\"id\":1,\"content\":{\"hash\":\"onw24u39TNLhLAWnzTwxRkU6gyuDvgU85ghKSsSBefDFr262TGT\",\"transactions\":[{\"entrypoint\":\"transfer\",\"value\":[{\"prim\":\"Pair\",\"args\":[{\"string\":\"tz1R3JsYrggHUmcMUu4kQUpcK9rh1MUSRLFQ\"},[]]}]}]}}"
+
+
+
+
+error
+
+kristofhetzl@Kristofs-MacBook-Pro-2 js-test % RUST_BACKTRACE=1 cargo run
+   Compiling js-test v0.1.0 (/Users/kristofhetzl/git/js-test)
+warning: unused variable: `big_map_keys`
+   --> src/main.rs:270:9
+    |
+270 |     let big_map_keys = BigMapKey {};
+    |         ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_big_map_keys`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: field is never read: `id`
+  --> src/main.rs:24:5
+   |
+24 |     id: isize,
+   |     ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field is never read: `error`
+  --> src/main.rs:70:13
+   |
+70 |     error { error: String },
+   |             ^^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:77:15
+   |
+77 |     applied { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:78:14
+   |
+78 |     failed { hash: String },
+   |              ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:79:15
+   |
+79 |     skipped { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:80:19
+   |
+80 |     backtracked { hash: String },
+   |                   ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:81:15
+   |
+81 |     unknown { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `error`
+  --> src/main.rs:82:13
+   |
+82 |     error { error: String },
+   |             ^^^^^^^^^^^^^
+
+warning: `js-test` (bin "js-test") generated 9 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/js-test`
+zsh: killed     RUST_BACKTRACE=1 cargo run
+kristofhetzl@Kristofs-MacBook-Pro-2 js-test % RUST_BACKTRACE=1 cargo run
+   Compiling js-test v0.1.0 (/Users/kristofhetzl/git/js-test)
+warning: unused variable: `big_map_keys`
+   --> src/main.rs:247:9
+    |
+247 |     let big_map_keys = BigMapKey {};
+    |         ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_big_map_keys`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: field is never read: `id`
+  --> src/main.rs:24:5
+   |
+24 |     id: isize,
+   |     ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field is never read: `error`
+  --> src/main.rs:70:13
+   |
+70 |     error { error: String },
+   |             ^^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:77:15
+   |
+77 |     applied { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:78:14
+   |
+78 |     failed { hash: String },
+   |              ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:79:15
+   |
+79 |     skipped { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:80:19
+   |
+80 |     backtracked { hash: String },
+   |                   ^^^^^^^^^^^^
+
+warning: field is never read: `hash`
+  --> src/main.rs:81:15
+   |
+81 |     unknown { hash: String },
+   |               ^^^^^^^^^^^^
+
+warning: field is never read: `error`
+  --> src/main.rs:82:13
+   |
+82 |     error { error: String },
+   |             ^^^^^^^^^^^^^
+
+warning: `js-test` (bin "js-test") generated 9 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 0.57s
+     Running `target/debug/js-test`
+payload: {"id":1,"content":{"kind":"transaction","rpc_node":"https://mainnet.api.tez.ie","secret":"","confirmation":1,"destination":"","entrypoint":"","payload":[]}}
+--- "{\"id\":1,\"content\":{\"status\":\"error\",\"error\":\"InvalidKeyError: The key  is invalid. Unsupported key type\\n    at new InMemorySigner (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:329:27)\\n    at Function.<anonymous> (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:339:24)\\n    at Generator.next (<anonymous>)\\n    at /Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:34:75\\n    at new Promise (<anonymous>)\\n    at __awaiter (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:30:16)\\n    at Function.fromSecretKey (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:338:20)\\n    at onTransactionRequest (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:162:39)\\n    at onRequest (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:307:12)\\n    at Transform.<anonymous> (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:321:3) {\\n  key: '',\\n  errorDetail: 'Unsupported key type'\\n}\"}}"
+tx: error { error: "InvalidKeyError: The key  is invalid. Unsupported key type\n    at new InMemorySigner (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:329:27)\n    at Function.<anonymous> (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:339:24)\n    at Generator.next (<anonymous>)\n    at /Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:34:75\n    at new Promise (<anonymous>)\n    at __awaiter (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:30:16)\n    at Function.fromSecretKey (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/signer/dist/taquito-signer.umd.js:338:20)\n    at onTransactionRequest (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:162:39)\n    at onRequest (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:307:12)\n    at Transform.<anonymous> (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:321:3) {\n  key: '',\n  errorDetail: 'Unsupported key type'\n}" }
+payload: {"id":1,"content":{"kind":"storage","rpc_node":"https://mainnet.api.tez.ie","confirmation":1,"destination":"KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE"}}
+--- "{\"id\":1,\"content\":{\"status\":\"success\",\"storage\":{\"prim\":\"Pair\",\"args\":[{\"prim\":\"Pair\",\"args\":[{\"prim\":\"Pair\",\"args\":[{\"string\":\"tz1fepn7jZsCYBqCDhpM63hzh9g2Ytqk4Tpv\"},{\"int\":\"589146\"}]},{\"string\":\"tz1burnburnburnburnburnburnburjAYjjX\"},{\"int\":\"22785\"},{\"int\":\"22786\"}]},{\"prim\":\"Pair\",\"args\":[{\"int\":\"22787\"},{\"prim\":\"False\"},{\"string\":\"tz1e8XGv6ngNoLt1ZNkEi6sG1A39yF48iwdS\"}]},{\"int\":\"22788\"},{\"int\":\"22789\"},{\"string\":\"tz1dtzgLYUHMhP6sWeFtFsHkHqyPezBBPLsZ\"}]}}}"
+storage: success
+payload: {"id":1,"content":{"kind":"big_map_keys","rpc_node":"https://mainnet.api.tez.ie","confirmation":1,"destination":"KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE","keys":[]}}
+--- "{\"id\":1,\"content\":{\"status\":\"error\",\"error\":\"TypeError: storage.getMultipleValues is not a function\\n    at onBigMapMultipleKeyRequest (/Users/kristofhetzl/git/js-test/src/tezos_js_bridge.js:217:35)\\n    at processTicksAndRejections (node:internal/process/task_queues:96:5)\"}}"
+bigmap: error
+payload: {"id":1,"content":{"kind":"listen","rpc_node":"https://mainnet.api.tez.ie","confirmation":1,"destination":"KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE"}}
+MissedBlockDuringConfirmationError: Taquito missed a block while waiting for operation confirmation and was not able to find the operation
+    at TapSubscriber._tapNext (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/taquito/dist/taquito.umd.js:1230:27)
+    at TapSubscriber._next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/tap.js:59:27)
+    at TapSubscriber.Subscriber.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:66:18)
+    at MergeMapSubscriber.notifyNext (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/mergeMap.js:93:26)
+    at SimpleInnerSubscriber._next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/innerSubscribe.js:27:21)
+    at SimpleInnerSubscriber.Subscriber.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:66:18)
+    at ReplaySubject.Subject.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subject.js:60:25)
+    at ReplaySubject.nextInfiniteTimeWindow (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/ReplaySubject.js:50:31)
+    at Object.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/shareReplay.js:36:29)
+    at SafeSubscriber.__tryOrUnsub (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:205:16)
+MissedBlockDuringConfirmationError: Taquito missed a block while waiting for operation confirmation and was not able to find the operation
+    at TapSubscriber._tapNext (/Users/kristofhetzl/git/js-test/src/node_modules/@taquito/taquito/dist/taquito.umd.js:1230:27)
+    at TapSubscriber._next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/tap.js:59:27)
+    at TapSubscriber.Subscriber.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:66:18)
+    at MergeMapSubscriber.notifyNext (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/mergeMap.js:93:26)
+    at SimpleInnerSubscriber._next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/innerSubscribe.js:27:21)
+    at SimpleInnerSubscriber.Subscriber.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:66:18)
+    at ReplaySubject.Subject.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subject.js:60:25)
+    at ReplaySubject.nextInfiniteTimeWindow (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/ReplaySubject.js:50:31)
+    at Object.next (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/operators/shareReplay.js:36:29)
+    at SafeSubscriber.__tryOrUnsub (/Users/kristofhetzl/git/js-test/src/node_modules/rxjs/internal/Subscriber.js:205:16)
+--- "{\"id\":1,\"content\":{\"status\":\"error\",\"error\":{\"errorDetail\":{\"message\":\"getaddrinfo ENOTFOUND mainnet.api.tez.ie\",\"name\":\"Error\",\"stack\":\"Error: getaddrinfo ENOTFOUND mainnet.api.tez.ie\\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:71:26)\",\"config\":{\"transitional\":{\"silentJSONParsing\":true,\"forcedJSONParsing\":true,\"clarifyTimeoutError\":false},\"transformRequest\":[null],\"transformResponse\":[null],\"timeout\":30000,\"xsrfCookieName\":\"XSRF-TOKEN\",\"xsrfHeaderName\":\"X-XSRF-TOKEN\",\"maxContentLength\":-1,\"maxBodyLength\":-1,\"headers\":{\"Accept\":\"application/json, text/plain, */*\",\"Content-Type\":\"application/json\",\"User-Agent\":\"axios/0.26.1\"},\"url\":\"https://mainnet.api.tez.ie/chains/main/blocks/head\",\"method\":\"get\",\"responseType\":\"json\"},\"code\":\"ENOTFOUND\",\"status\":null},\"name\":\"HttpRequestFailed\"}}}"
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error("invalid type: map, expected a string", line: 1, column: 811)', src/main.rs:137:85
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/std/src/panicking.rs:517:5
+   1: core::panicking::panic_fmt
+             at /rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/panicking.rs:100:14
+   2: core::result::unwrap_failed
+             at /rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/result.rs:1616:5
+   3: core::result::Result<T,E>::unwrap
+             at /rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/result.rs:1298:23
+   4: js_test::Bridge::listen_transaction
+             at ./src/main.rs:137:57
+   5: js_test::main
+             at ./src/main.rs:274:5
+   6: core::ops::function::FnOnce::call_once
+             at /rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/ops/function.rs:227:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
