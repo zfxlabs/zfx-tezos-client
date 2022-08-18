@@ -14,8 +14,9 @@ fn main() -> Result<()> {
 }
 
 async fn sanity() {
-    //let rpc_node = "https://jakartanet.ecadinfra.com".to_string();
+    let testnet_rpc_node = "https://jakartanet.ecadinfra.com".to_string();
     let rpc_node = "https://mainnet.api.tez.ie".to_string();
+    let local_node = "http://localhost:8732".to_string();
     let secret = "".to_string();
     let confirmations: isize = 1;
     let destination = "".to_string();
@@ -29,6 +30,8 @@ async fn sanity() {
     // let contract_address = "KT18muiNLcRnDqF1y7yowgea3iBU7QZXFzTD".to_string();
     // FXHASH contract - on mainnet
     let contract_address = "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE".to_string();
+    let burn_address = "tz1burnburnburnburnburnburnburjAYjjX".to_string();
+    let bob_account = "tz1To7Uo3WYSwJanLGD1yYGtkMRKiJCtx6gX".to_string();
 
     println!("before storage1");
     let storage1 = bridge
@@ -40,9 +43,25 @@ async fn sanity() {
         .await;
     println!("storage2: {:?}", storage2);
     let storage3 = bridge
-        .storage(rpc_node.clone(), confirmations, contract_address.clone())
+        .storage(local_node.clone(), confirmations, contract_address.clone())
         .await;
-    println!("storage3: {:?}", storage3);
+    println!(">>> local storage3: {:?}", storage3);
+
+    let mut listen = bridge
+        .listen(
+            local_node.clone(),
+            //testnet_rpc_node.clone(),
+            confirmations,
+            //burn_address.clone(),
+            bob_account.clone(),
+        )
+        .await
+        .unwrap();
+
+    println!("listening!");
+    while let Ok(stuff) = listen.recv().await {
+        println!("Listen: {:?}", stuff);
+    }
 
     //bridge.drop();
     std::thread::sleep(std::time::Duration::from_secs(5));

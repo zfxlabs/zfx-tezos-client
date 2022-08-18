@@ -29,25 +29,16 @@ struct SubscribeToListen {
 }
 
 #[derive(Message)]
-#[rtype(result = "Option<SyncChannelForId>")]
-struct GetSyncChannelForId {
+#[rtype(result = "ChannelForId")]
+struct GetChannelForId {
     id: isize,
 }
 
 #[derive(Debug, MessageResponse)]
-struct SyncChannelForId {
-    sender: oneshot::Sender<Value>,
-}
-
-#[derive(Message)]
-#[rtype(result = "Option<ListenChannelForId>")]
-struct GetListenChannelForId {
-    id: isize,
-}
-
-#[derive(Debug, MessageResponse)]
-struct ListenChannelForId {
-    sender: broadcast::Sender<Value>,
+enum ChannelForId {
+    Oneshot { sender: oneshot::Sender<Value> },
+    Broadcast { sender: broadcast::Sender<Value> },
+    None,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -168,7 +159,12 @@ impl Bridge {
         Ok(response)
     }
 
-    pub async fn listen(&mut self, rpc_node: String, confirmation: isize, destination: String) {
+    pub async fn listen(
+        &mut self,
+        rpc_node: String,
+        confirmation: isize,
+        destination: String,
+    ) -> Result<broadcast::Receiver<Value>> {
         let listen_buffer_capacity = 128; // FIXME: constant or config
         let (sender, mut receiver) = broadcast::channel(listen_buffer_capacity);
         let id = self.addr.send(SubscribeToListen { sender }).await;
@@ -178,6 +174,8 @@ impl Bridge {
             confirmation,
             destination,
         };
+        submit_request(&mut self.stdin, id.unwrap(), content).await;
+        Ok(receiver)
     }
 
     pub fn drop(&mut self, rpc_node: String, confirmation: isize, destination: String) {}
@@ -238,30 +236,22 @@ impl Handler<SubscribeToListen> for BridgeActor {
     }
 }
 
-impl Handler<GetSyncChannelForId> for BridgeActor {
-    type Result = Option<SyncChannelForId>;
+impl Handler<GetChannelForId> for BridgeActor {
+    type Result = ChannelForId;
 
-    fn handle(&mut self, msg: GetSyncChannelForId, _ctx: &mut Context<Self>) -> Self::Result {
+    fn handle(&mut self, msg: GetChannelForId, _ctx: &mut Context<Self>) -> Self::Result {
         match self.sync_requests.remove(&msg.id) {
-            Some(sender) => Some(SyncChannelForId { sender }),
-            None => None,
-        }
-    }
-}
-
-impl Handler<GetListenChannelForId> for BridgeActor {
-    type Result = Option<ListenChannelForId>;
-
-    fn handle(&mut self, msg: GetListenChannelForId, _ctx: &mut Context<Self>) -> Self::Result {
-        match self.listen_requests.remove(&msg.id) {
-            Some(sender) => {
-                let response = ListenChannelForId {
-                    sender: sender.clone(),
-                };
-                self.listen_requests.insert(msg.id, sender);
-                Some(response)
-            }
-            _ => None,
+            Some(sender) => ChannelForId::Oneshot { sender },
+            None => match self.listen_requests.remove(&msg.id) {
+                Some(sender) => {
+                    let response = ChannelForId::Broadcast {
+                        sender: sender.clone(),
+                    };
+                    self.listen_requests.insert(msg.id, sender);
+                    response
+                }
+                _ => ChannelForId::None,
+            },
         }
     }
 }
@@ -282,12 +272,19 @@ async fn process_response(bridge_manager: Addr<BridgeActor>, line: String) {
     println!("line: {:?}", line);
     let response: BridgeResponse = serde_json::from_str(&line).expect("unable to decode json");
     let res = bridge_manager
-        .send(GetSyncChannelForId { id: response.id })
+        .send(GetChannelForId { id: response.id })
         .await
         .expect("requesting id from bridge_manager failed");
 
     match res {
-        Some(SyncChannelForId { sender }) => sender.send(response.content).unwrap(),
-        None => println!("oopsie"),
+        ChannelForId::Oneshot { sender } => {
+            sender.send(response.content).unwrap();
+            ()
+        }
+        ChannelForId::Broadcast { sender } => {
+            sender.send(response.content).unwrap();
+            ()
+        }
+        ChannelForId::None => println!("oopsie"),
     }
 }
