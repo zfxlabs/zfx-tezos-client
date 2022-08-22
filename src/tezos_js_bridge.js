@@ -125,6 +125,7 @@ const read = (callback) => {
 
       const parts = buf.split("\n");
       const messages = parts.slice(0, -1); // everything except last
+
       buf = parts.slice(-1)[0]; // last
 
       for (const message of messages) {

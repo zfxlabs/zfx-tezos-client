@@ -30,8 +30,8 @@ async fn sanity() {
     // let contract_address = "KT18muiNLcRnDqF1y7yowgea3iBU7QZXFzTD".to_string();
     // FXHASH contract - on mainnet
     let contract_address = "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE".to_string();
-    let burn_address = "tz1burnburnburnburnburnburnburjAYjjX".to_string();
-    let bob_account = "tz1To7Uo3WYSwJanLGD1yYGtkMRKiJCtx6gX".to_string();
+    // My magic testnet contract
+    let testnet_contract_address = "KT1E9huZSqhk2FexWUQ1ckUmQZoiXeG5vFyk".to_string();
 
     println!("before storage1");
     let storage1 = bridge
@@ -51,9 +51,11 @@ async fn sanity() {
         .listen(
             local_node.clone(),
             //testnet_rpc_node.clone(),
+            //rpc_node,
             confirmations,
             //burn_address.clone(),
-            bob_account.clone(),
+            //bob_account.clone(),
+            testnet_contract_address,
         )
         .await
         .unwrap();

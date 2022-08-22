@@ -261,6 +261,7 @@ async fn submit_request(stdin: &mut ChildStdin, id: isize, content: RequestConte
     let request = BridgeRequest { id, content };
     let json = serde_json::to_string(&request).expect("Failed to encode request to JSON");
     let payload = format!("{}\n", json);
+    println!(">>> payload sent: {}", payload);
     stdin
         .write_all(&payload.as_bytes())
         .await
