@@ -1,0 +1,14 @@
+version: '3'
+services:
+  zfx-tezos-client:
+    network_mode: host
+    image: zfx-tezos-client:latest
+    ports:
+      - "1234:1234"
+    expose:
+      - "1234"
+    environment:
+      - RPC_ADDRESS=${RPC_ADDRESS}
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
+    container_name: zfx-tezos-client
+    restart: always
