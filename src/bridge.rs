@@ -106,7 +106,13 @@ impl Bridge {
             payload, //: vec![], // FIXME
         };
         let (sender, receiver) = oneshot::channel::<Value>();
-        let id = self.addr.send(SubscribeToResponse { sender }).await;
+        let id = self
+            .addr
+            .send(SubscribeToResponse { sender })
+            .await
+            .unwrap();
+
+        submit_request(&mut self.stdin, id, content).await;
 
         let data = receiver.await;
         let response: TransactionResponse = serde_json::from_value(data.unwrap()).unwrap();

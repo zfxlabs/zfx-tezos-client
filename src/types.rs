@@ -16,7 +16,6 @@ pub struct BridgeResponse<T> {
 }
 
 //#[derive(Clone, Debug, Serialize)]
-//struct BigMapKey {} // FIXME: this seems to be an alias for String
 pub type BigMapKey = String;
 
 #[derive(Clone, Debug, Serialize)]
