@@ -53,11 +53,11 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
     //let testnet_rpc_node = "https://jakartanet.ecadinfra.com".to_string();
     //let rpc_node = "https://mainnet.api.tez.ie".to_string();
     let local_node = rpc_node.to_string();
-    let secret = "".to_string();
+    //let secret = "".to_string();
     let confirmations: isize = 1;
-    let destination = "".to_string();
-    let entrypoint = "".to_string();
-    let big_map_keys = vec!["stuff".to_string()];
+    //let destination = "".to_string();
+    //let entrypoint = "".to_string();
+    //let big_map_keys = vec!["stuff".to_string()];
 
     let mut bridge = Bridge::new().await;
     //println!("bridge: {:?}", bridge);
@@ -70,30 +70,22 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
     // My magic testnet contract
     //let testnet_contract_address = "KT1E9huZSqhk2FexWUQ1ckUmQZoiXeG5vFyk".to_string();
 
-    // println!("before storage1");
-    // let storage1 = bridge
-    //     .storage(rpc_node.clone(), confirmations, contract_address.clone())
-    //     .await;
-    // println!("storage1: {:?}", storage1);
-    // let storage2 = bridge
-    //     .storage(rpc_node.clone(), confirmations, contract_address.clone())
-    //     .await;
-    // println!("storage2: {:?}", storage2);
+    println!("before storage1");
+    let storage1 = bridge
+        .storage(rpc_node.clone(), confirmations, contract_address.clone())
+        .await;
+    println!("storage1: {:?}", storage1);
+    let storage2 = bridge
+        .storage(rpc_node.clone(), confirmations, contract_address.clone())
+        .await;
+    println!("storage2: {:?}", storage2);
     let storage3 = bridge
         .storage(local_node.clone(), confirmations, contract_address.clone())
         .await;
     println!(">>> local storage3: {:?}", storage3);
 
     let mut listen = bridge
-        .listen(
-            local_node.clone(),
-            //testnet_rpc_node.clone(),
-            //rpc_node,
-            confirmations,
-            //burn_address.clone(),
-            //bob_account.clone(),
-            contract_address,
-        )
+        .listen(local_node.clone(), confirmations, contract_address)
         .await
         .unwrap();
 
@@ -102,7 +94,6 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
         println!("Listen: {:?}", stuff);
     }
 
-    //bridge.drop();
     std::thread::sleep(std::time::Duration::from_secs(5));
     println!("ended");
 }

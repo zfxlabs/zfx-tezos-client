@@ -556,6 +556,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 
 [[package]]
+name = "zfx-michelson"
+version = "0.1.0"
+source = "git+https://github.com/zfxlabs/zfx-michelson?branch=expression_class#f798c2923a39d96d9d2b8b122b2e5c260e4f8781"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "zfx-tezos-client"
 version = "0.1.0"
 dependencies = [
@@ -564,4 +574,5 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "zfx-michelson",
 ]

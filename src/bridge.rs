@@ -2,18 +2,17 @@ use crate::prelude::*;
 use crate::types::*;
 pub use crate::{Error, Result};
 
-use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
+use serde::Deserialize;
 
 use std::collections::HashMap;
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, Command};
 
-use std::process::Stdio;
-
 use tokio::sync::broadcast;
 use tokio::sync::oneshot;
+
+use std::process::Stdio;
 
 // Internal messages
 #[derive(Message)]
@@ -50,13 +49,12 @@ struct BridgeResponse {
 #[derive(Debug)]
 pub struct Bridge {
     addr: Addr<BridgeActor>,
-    child: tokio::process::Child,
     stdin: ChildStdin,
 }
 
 impl Bridge {
     pub async fn new() -> Bridge {
-        let mut child = tokio::process::Command::new("node")
+        let mut child = Command::new("node")
             .current_dir("./src")
             .args(&["tezos_js_bridge.js"]) //FIXME: config
             .stdin(Stdio::piped())
@@ -87,7 +85,7 @@ impl Bridge {
         });
 
         let stdin = child.stdin.take().expect("couldn't get stdin");
-        Bridge { addr, child, stdin }
+        Bridge { addr, stdin }
     }
 
     pub async fn inject_transaction(
@@ -97,7 +95,7 @@ impl Bridge {
         confirmation: isize,
         destination: String,
         entrypoint: String,
-        payload: Vec<T>,
+        payload: Vec<MichelsonV1Expression>,
     ) -> Result<TransactionResponse> {
         let content = RequestContent::transaction {
             rpc_node,
@@ -166,7 +164,7 @@ impl Bridge {
         destination: String,
     ) -> Result<broadcast::Receiver<Value>> {
         let listen_buffer_capacity = 128; // FIXME: constant or config
-        let (sender, mut receiver) = broadcast::channel(listen_buffer_capacity);
+        let (sender, receiver) = broadcast::channel(listen_buffer_capacity);
         let id = self.addr.send(SubscribeToListen { sender }).await;
 
         let content = RequestContent::listen {
@@ -177,8 +175,6 @@ impl Bridge {
         submit_request(&mut self.stdin, id.unwrap(), content).await;
         Ok(receiver)
     }
-
-    pub fn drop(&mut self, rpc_node: String, confirmation: isize, destination: String) {}
 }
 
 #[derive(Debug)]
