@@ -1,10 +1,12 @@
-//use std::io::{self, BufRead, BufReader, Error, ErrorKind, Write};
-
 use std::env;
 
-//use actix::prelude::*;
+use serde_json::Value;
+
 use zfx_tezos_client::bridge::Bridge;
 use zfx_tezos_client::Result;
+
+use zfx_michelson::michelson::*;
+use zfx_tezos_client::prelude::*;
 
 use clap::{value_t, values_t, App, Arg};
 
@@ -50,25 +52,16 @@ fn main() -> Result<()> {
 }
 
 async fn sanity(rpc_node: &String, contract_address: &String) {
-    //let testnet_rpc_node = "https://jakartanet.ecadinfra.com".to_string();
-    //let rpc_node = "https://mainnet.api.tez.ie".to_string();
+    // Install
+    zfx_michelson::michelson::install_parser().await;
+    zfx_tezos_client::bridge::install().await;
+
     let local_node = rpc_node.to_string();
-    //let secret = "".to_string();
     let confirmations: isize = 1;
-    //let destination = "".to_string();
-    //let entrypoint = "".to_string();
-    //let big_map_keys = vec!["stuff".to_string()];
 
-    let mut bridge = Bridge::new().await;
-    //println!("bridge: {:?}", bridge);
+    let mut bridge = Bridge::new();
 
-    // this is an existing contract for kolibri on mainnet
-    // let contract_address = "KT18muiNLcRnDqF1y7yowgea3iBU7QZXFzTD".to_string();
-    // FXHASH contract - on mainnet
-    //let contract_address = "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE".to_string();
     let contract_address = contract_address.to_string();
-    // My magic testnet contract
-    //let testnet_contract_address = "KT1E9huZSqhk2FexWUQ1ckUmQZoiXeG5vFyk".to_string();
 
     println!("before storage1");
     let storage1 = bridge
@@ -81,8 +74,22 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
     println!("storage2: {:?}", storage2);
     let storage3 = bridge
         .storage(local_node.clone(), confirmations, contract_address.clone())
-        .await;
+        .await
+        .unwrap();
     println!(">>> local storage3: {:?}", storage3);
+
+    let schema_str = "{ \"prim\": \"int\" }".to_string();
+    let schema: Value = serde_json::from_str(&schema_str).unwrap();
+    println!("schema: {:?}", schema);
+
+    match storage3 {
+        StorageResponse::success { storage } => {
+            let mut p = Parser::new();
+            let decoded = p.decode(storage, schema.clone()).await;
+            println!("decoded: {:?}", decoded);
+        }
+        _ => println!("not successful!"),
+    }
 
     let mut listen = bridge
         .listen(local_node.clone(), confirmations, contract_address)

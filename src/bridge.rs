@@ -1,18 +1,31 @@
 use crate::prelude::*;
-use crate::types::*;
-pub use crate::{Error, Result};
 
 use serde::Deserialize;
 
 use std::collections::HashMap;
 
+use include_dir::{include_dir, Dir};
+
+use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, Command};
-
 use tokio::sync::broadcast;
 use tokio::sync::oneshot;
 
 use std::process::Stdio;
+
+static SCRIPTS_DIR: Dir<'_> = include_dir!("./scripts");
+static BUNDLE_NAME: &str = "tezos_js_bridge.bundle.js";
+
+pub async fn install() {
+    let bridge_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
+
+    let mut file_to_deploy = File::create(BUNDLE_NAME).await.unwrap();
+    file_to_deploy
+        .write_all(bridge_js.contents())
+        .await
+        .unwrap();
+}
 
 // Internal messages
 #[derive(Message)]
@@ -53,7 +66,7 @@ pub struct Bridge {
 }
 
 impl Bridge {
-    pub async fn new() -> Bridge {
+    pub fn new() -> Bridge {
         let mut child = Command::new("node")
             .current_dir("./src")
             .args(&["tezos_js_bridge.js"]) //FIXME: config
