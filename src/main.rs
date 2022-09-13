@@ -2,7 +2,7 @@ use std::env;
 
 use serde_json::Value;
 
-use zfx_tezos_client::bridge::Bridge;
+use zfx_tezos_client::bridge::*;
 use zfx_tezos_client::Result;
 
 use zfx_michelson::michelson::*;
@@ -53,8 +53,8 @@ fn main() -> Result<()> {
 
 async fn sanity(rpc_node: &String, contract_address: &String) {
     // Install
-    zfx_michelson::michelson::install_parser().await;
-    zfx_tezos_client::bridge::install().await;
+    install_parser().await;
+    install_bridge().await;
 
     let local_node = rpc_node.to_string();
     let confirmations: isize = 1;

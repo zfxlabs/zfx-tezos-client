@@ -17,7 +17,7 @@ use std::process::Stdio;
 static SCRIPTS_DIR: Dir<'_> = include_dir!("./scripts");
 static BUNDLE_NAME: &str = "tezos_js_bridge.bundle.js";
 
-pub async fn install() {
+pub async fn install_bridge() {
     let bridge_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
 
     let mut file_to_deploy = File::create(BUNDLE_NAME).await.unwrap();
