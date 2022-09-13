@@ -82,14 +82,25 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
     let schema: Value = serde_json::from_str(&schema_str).unwrap();
     println!("schema: {:?}", schema);
 
+    let mut p = Parser::new();
+
     match storage3 {
         StorageResponse::success { storage } => {
-            let mut p = Parser::new();
             let decoded = p.decode(storage, schema.clone()).await;
             println!("decoded: {:?}", decoded);
         }
         _ => println!("not successful!"),
     }
+
+    let param_schema_str = "{ \"prim\": \"or\",
+          \"args\":
+            [ { \"prim\": \"or\",
+                \"args\":
+                  [ { \"prim\": \"int\", \"annots\": [ \"%decrement\" ] },
+                    { \"prim\": \"int\", \"annots\": [ \"%increment\" ] } ] },
+              { \"prim\": \"unit\", \"annots\": [ \"%reset\" ] } ] }"
+        .to_string();
+    let param_schema: Value = serde_json::from_str(&param_schema_str).unwrap();
 
     let mut listen = bridge
         .listen(local_node.clone(), confirmations, contract_address)
@@ -99,6 +110,16 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
     println!("listening!");
     while let Ok(stuff) = listen.recv().await {
         println!("Listen: {:?}", stuff);
+        let v = stuff
+            .get("transactions")
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .get("value")
+            .unwrap();
+        println!("V {:?}", v.clone());
+        let decoded_tx = p.decode(v.clone(), param_schema.clone()).await;
+        println!("decoded tx: {:?}", decoded_tx);
     }
 
     std::thread::sleep(std::time::Duration::from_secs(5));

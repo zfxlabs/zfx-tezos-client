@@ -577,7 +577,7 @@ checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 [[package]]
 name = "zfx-michelson"
 version = "0.1.0"
-source = "git+https://github.com/zfxlabs/zfx-michelson?branch=expression_class#8eb7c4dff3ab161995b00494b5f8660f48ef1772"
+source = "git+https://github.com/zfxlabs/zfx-michelson#8d7ba4eda12494228980a7149408eb734df53325"
 dependencies = [
  "include_dir",
  "serde",
