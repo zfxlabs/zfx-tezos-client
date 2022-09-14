@@ -1,8 +1,5 @@
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MichelsonV1Expression {}
 
 #[derive(Clone, Debug, Serialize)]
 pub struct BridgeRequest {
@@ -18,11 +15,7 @@ pub struct BridgeResponse<T> {
     pub content: T, // String, // FIXME: this is a new type
 }
 
-#[derive(Clone, Debug, Serialize)]
-pub struct T {}
-
 //#[derive(Clone, Debug, Serialize)]
-//struct BigMapKey {} // FIXME: this seems to be an alias for String
 pub type BigMapKey = String;
 
 #[derive(Clone, Debug, Serialize)]
@@ -42,7 +35,7 @@ pub enum RequestContent {
         confirmation: isize,
         destination: String,
         entrypoint: String,
-        payload: Vec<T>, //Yojson.Safe.t;
+        payload: Vec<MichelsonV1Expression>,
     },
     storage {
         rpc_node: String,

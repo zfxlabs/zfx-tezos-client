@@ -1,19 +1,31 @@
 use crate::prelude::*;
-use crate::types::*;
-pub use crate::{Error, Result};
 
-use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
+use serde::Deserialize;
 
 use std::collections::HashMap;
 
+use include_dir::{include_dir, Dir};
+
+use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, Command};
+use tokio::sync::broadcast;
+use tokio::sync::oneshot;
 
 use std::process::Stdio;
 
-use tokio::sync::broadcast;
-use tokio::sync::oneshot;
+static SCRIPTS_DIR: Dir<'_> = include_dir!("./scripts");
+static BUNDLE_NAME: &str = "tezos_js_bridge.bundle.js";
+
+pub async fn install_bridge() {
+    let bridge_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
+
+    let mut file_to_deploy = File::create(BUNDLE_NAME).await.unwrap();
+    file_to_deploy
+        .write_all(bridge_js.contents())
+        .await
+        .unwrap();
+}
 
 // Internal messages
 #[derive(Message)]
@@ -50,13 +62,12 @@ struct BridgeResponse {
 #[derive(Debug)]
 pub struct Bridge {
     addr: Addr<BridgeActor>,
-    child: tokio::process::Child,
     stdin: ChildStdin,
 }
 
 impl Bridge {
-    pub async fn new() -> Bridge {
-        let mut child = tokio::process::Command::new("node")
+    pub fn new() -> Bridge {
+        let mut child = Command::new("node")
             .current_dir("./src")
             .args(&["tezos_js_bridge.js"]) //FIXME: config
             .stdin(Stdio::piped())
@@ -87,7 +98,7 @@ impl Bridge {
         });
 
         let stdin = child.stdin.take().expect("couldn't get stdin");
-        Bridge { addr, child, stdin }
+        Bridge { addr, stdin }
     }
 
     pub async fn inject_transaction(
@@ -97,7 +108,7 @@ impl Bridge {
         confirmation: isize,
         destination: String,
         entrypoint: String,
-        payload: Vec<T>,
+        payload: Vec<MichelsonV1Expression>,
     ) -> Result<TransactionResponse> {
         let content = RequestContent::transaction {
             rpc_node,
@@ -108,7 +119,13 @@ impl Bridge {
             payload, //: vec![], // FIXME
         };
         let (sender, receiver) = oneshot::channel::<Value>();
-        let id = self.addr.send(SubscribeToResponse { sender }).await;
+        let id = self
+            .addr
+            .send(SubscribeToResponse { sender })
+            .await
+            .unwrap();
+
+        submit_request(&mut self.stdin, id, content).await;
 
         let data = receiver.await;
         let response: TransactionResponse = serde_json::from_value(data.unwrap()).unwrap();
@@ -166,7 +183,7 @@ impl Bridge {
         destination: String,
     ) -> Result<broadcast::Receiver<Value>> {
         let listen_buffer_capacity = 128; // FIXME: constant or config
-        let (sender, mut receiver) = broadcast::channel(listen_buffer_capacity);
+        let (sender, receiver) = broadcast::channel(listen_buffer_capacity);
         let id = self.addr.send(SubscribeToListen { sender }).await;
 
         let content = RequestContent::listen {
@@ -177,8 +194,6 @@ impl Bridge {
         submit_request(&mut self.stdin, id.unwrap(), content).await;
         Ok(receiver)
     }
-
-    pub fn drop(&mut self, rpc_node: String, confirmation: isize, destination: String) {}
 }
 
 #[derive(Debug)]

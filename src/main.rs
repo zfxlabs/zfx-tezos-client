@@ -1,10 +1,12 @@
-//use std::io::{self, BufRead, BufReader, Error, ErrorKind, Write};
-
 use std::env;
 
-//use actix::prelude::*;
-use zfx_tezos_client::bridge::Bridge;
+use serde_json::Value;
+
+use zfx_tezos_client::bridge::*;
 use zfx_tezos_client::Result;
+
+use zfx_michelson::michelson::*;
+use zfx_tezos_client::prelude::*;
 
 use clap::{value_t, values_t, App, Arg};
 
@@ -50,59 +52,76 @@ fn main() -> Result<()> {
 }
 
 async fn sanity(rpc_node: &String, contract_address: &String) {
-    //let testnet_rpc_node = "https://jakartanet.ecadinfra.com".to_string();
-    //let rpc_node = "https://mainnet.api.tez.ie".to_string();
+    // Install
+    install_parser().await;
+    install_bridge().await;
+
     let local_node = rpc_node.to_string();
-    let secret = "".to_string();
     let confirmations: isize = 1;
-    let destination = "".to_string();
-    let entrypoint = "".to_string();
-    let big_map_keys = vec!["stuff".to_string()];
 
-    let mut bridge = Bridge::new().await;
-    //println!("bridge: {:?}", bridge);
+    let mut bridge = Bridge::new();
 
-    // this is an existing contract for kolibri on mainnet
-    // let contract_address = "KT18muiNLcRnDqF1y7yowgea3iBU7QZXFzTD".to_string();
-    // FXHASH contract - on mainnet
-    //let contract_address = "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE".to_string();
     let contract_address = contract_address.to_string();
-    // My magic testnet contract
-    //let testnet_contract_address = "KT1E9huZSqhk2FexWUQ1ckUmQZoiXeG5vFyk".to_string();
 
-    // println!("before storage1");
-    // let storage1 = bridge
-    //     .storage(rpc_node.clone(), confirmations, contract_address.clone())
-    //     .await;
-    // println!("storage1: {:?}", storage1);
-    // let storage2 = bridge
-    //     .storage(rpc_node.clone(), confirmations, contract_address.clone())
-    //     .await;
-    // println!("storage2: {:?}", storage2);
+    println!("before storage1");
+    let storage1 = bridge
+        .storage(rpc_node.clone(), confirmations, contract_address.clone())
+        .await;
+    println!("storage1: {:?}", storage1);
+    let storage2 = bridge
+        .storage(rpc_node.clone(), confirmations, contract_address.clone())
+        .await;
+    println!("storage2: {:?}", storage2);
     let storage3 = bridge
         .storage(local_node.clone(), confirmations, contract_address.clone())
-        .await;
+        .await
+        .unwrap();
     println!(">>> local storage3: {:?}", storage3);
 
+    let schema_str = "{ \"prim\": \"int\" }".to_string();
+    let schema: Value = serde_json::from_str(&schema_str).unwrap();
+    println!("schema: {:?}", schema);
+
+    let mut p = Parser::new();
+
+    match storage3 {
+        StorageResponse::success { storage } => {
+            let decoded = p.decode(storage, schema.clone()).await;
+            println!("decoded: {:?}", decoded);
+        }
+        _ => println!("not successful!"),
+    }
+
+    let param_schema_str = "{ \"prim\": \"or\",
+          \"args\":
+            [ { \"prim\": \"or\",
+                \"args\":
+                  [ { \"prim\": \"int\", \"annots\": [ \"%decrement\" ] },
+                    { \"prim\": \"int\", \"annots\": [ \"%increment\" ] } ] },
+              { \"prim\": \"unit\", \"annots\": [ \"%reset\" ] } ] }"
+        .to_string();
+    let param_schema: Value = serde_json::from_str(&param_schema_str).unwrap();
+
     let mut listen = bridge
-        .listen(
-            local_node.clone(),
-            //testnet_rpc_node.clone(),
-            //rpc_node,
-            confirmations,
-            //burn_address.clone(),
-            //bob_account.clone(),
-            contract_address,
-        )
+        .listen(local_node.clone(), confirmations, contract_address)
         .await
         .unwrap();
 
     println!("listening!");
     while let Ok(stuff) = listen.recv().await {
         println!("Listen: {:?}", stuff);
+        let v = stuff
+            .get("transactions")
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .get("value")
+            .unwrap();
+        println!("V {:?}", v.clone());
+        let decoded_tx = p.decode(v.clone(), param_schema.clone()).await;
+        println!("decoded tx: {:?}", decoded_tx);
     }
 
-    //bridge.drop();
     std::thread::sleep(std::time::Duration::from_secs(5));
     println!("ended");
 }
