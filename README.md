@@ -1,12 +1,12 @@
 # zfx-tezos-client
 
-Tezos light client library for Rust. Allows interactions with Tezos chains via RPC nodes.
+Tezos RPC client library for Rust. Allows interactions with Tezos chains via RPC nodes.
 
 ### Requirements
 
 This library needs Node.js 16.
 
-### Summary
+### Summary
 
 The library builds an Rust API layer around the `taquito` library. (See: https://tezostaquito.io/)
 
