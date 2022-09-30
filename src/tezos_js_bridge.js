@@ -302,8 +302,44 @@ const onListenTransaction = async (id, content) => {
   });
 };
 
+const onSubscribeTransaction = async (id, content) => {
+  const { rpc_node, confirmation } = content;
+  const Tezos = new TezosToolkit(rpc_node);
+  Tezos.setProvider({ config });
+//    console.log("source:", source);
+  const operationStream = Tezos.stream.subscribeOperation({
+    kind: OpKind.TRANSACTION,
+  });
+
+  operationStream.on("error", (error) =>
+    respond(id, { status: "error", error })
+  );
+  operationStream.on("data", async (content) => {
+    /** @type {rpc.OperationContentsAndResultMetadataTransaction} */
+    const metadata = content.metadata;
+    if (
+      content.kind !== OpKind.TRANSACTION ||
+      metadata.operation_result.status !== "applied"
+    ) {
+      return;
+    }
+
+      try {
+          const hash = content.hash;
+          const operation = await Tezos.operation.createTransactionOperation(hash);
+          const result = await operation.confirmation(confirmation);
+          if (await result.isInCurrentBranch()) {
+          respond(id, content);
+      }
+    } catch (err) {
+      console.error(err);
+      // TODO: what happens here? I feel like this is a noop
+    }
+  });
+};
+
 const onRequest = (id, content) => {
-  if (content.kind === "transaction") {
+    if (content.kind === "transaction") {
     return onTransactionRequest(id, content);
   } else if (content.kind === "storage") {
     return onStorageRequest(id, content);
@@ -311,6 +347,8 @@ const onRequest = (id, content) => {
     return onBigMapMultipleKeyRequest(id, content);
   } else if (content.kind === "listen") {
     return onListenTransaction(id, content);
+  } else if (content.kind === "subscribe") {
+    return onSubscribeTransaction(id, content);
   } else {
     failure(new Error("invalid content.kind: " + JSON.stringify(content.kind)));
   }

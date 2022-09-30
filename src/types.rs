@@ -29,6 +29,10 @@ pub enum RequestContent {
         confirmation: isize,
         destination: String,
     },
+    subscribe {
+        rpc_node: String,
+        confirmation: isize,
+    },
     transaction {
         rpc_node: String, // URI
         secret: String,
