@@ -102,8 +102,14 @@ async fn sanity(rpc_node: &String, contract_address: &String) {
         .to_string();
     let param_schema: Value = serde_json::from_str(&param_schema_str).unwrap();
 
+    //let alice = "tz1PiXkj6iCdqrVJtQAFkWptG3AeWEjqVPeZ".to_string();
+
+    //let mut listen = bridge
+    //    .listen(local_node.clone(), confirmations, contract_address)
+    //    .await
+    //    .unwrap();
     let mut listen = bridge
-        .listen(local_node.clone(), confirmations, contract_address)
+        .subscribe(local_node.clone(), confirmations)
         .await
         .unwrap();
 

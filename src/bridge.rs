@@ -194,6 +194,23 @@ impl Bridge {
         submit_request(&mut self.stdin, id.unwrap(), content).await;
         Ok(receiver)
     }
+
+    pub async fn subscribe(
+        &mut self,
+        rpc_node: String,
+        confirmation: isize,
+    ) -> Result<broadcast::Receiver<Value>> {
+        let listen_buffer_capacity = 128; // FIXME: constant or config
+        let (sender, receiver) = broadcast::channel(listen_buffer_capacity);
+        let id = self.addr.send(SubscribeToListen { sender }).await;
+
+        let content = RequestContent::subscribe {
+            rpc_node,
+            confirmation,
+        };
+        submit_request(&mut self.stdin, id.unwrap(), content).await;
+        Ok(receiver)
+    }
 }
 
 #[derive(Debug)]
