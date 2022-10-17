@@ -33,13 +33,14 @@ fn main() -> Result<()> {
 
     let rpc_node = match matches.value_of("rpc-address") {
         Some(node_str) => node_str.to_string(),
-        _ => "https://jakartanet.ecadinfra.com".to_string(),
+        _ => "https://ghostnet.tezos.marigold.dev/".to_string(),
+        // _ => "https://rpc.ghostnet.teztnets.xyz".to_string(),
     };
     println!("RPC url: {}", rpc_node);
 
     let contract_address = match matches.value_of("contract-address") {
         Some(addr) => addr.to_string(),
-        _ => "KT1E9huZSqhk2FexWUQ1ckUmQZoiXeG5vFyk".to_string(),
+        _ => "KT1BK1AK8Xx1x7uwrFeKbpcaFKuYAZhruUzT".to_string(),
     };
     println!("Contract address: {}", contract_address);
 
