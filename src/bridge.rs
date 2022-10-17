@@ -68,8 +68,10 @@ pub struct Bridge {
 impl Bridge {
     pub fn new() -> Bridge {
         let mut child = Command::new("node")
-            .current_dir("./src")
-            .args(&["tezos_js_bridge.js"]) //FIXME: config
+            // FIXME: https://github.com/webpack/webpack/issues/11350
+            // There's an outdated npm dependency somewhere
+            .arg("--no-deprecation")
+            .arg(BUNDLE_NAME) //FIXME: config
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
