@@ -96,7 +96,7 @@ impl Bridge {
                 }
             }
 
-            println!("listener ending");
+            // println!("listener ending");
         });
 
         let stdin = child.stdin.take().expect("couldn't get stdin");
@@ -238,12 +238,12 @@ impl Actor for BridgeActor {
     type Context = Context<Self>;
 
     fn started(&mut self, _ctx: &mut Context<Self>) {
-        println!("started bridge"); // TODO: remove
+        // println!("started bridge"); // TODO: remove
         ()
     }
 
     fn stopped(&mut self, _ctx: &mut Context<Self>) {
-        println!("stopped bridge"); // TODO: remove
+        // println!("stopped bridge"); // TODO: remove
         ()
     }
 }
@@ -295,7 +295,7 @@ async fn submit_request(stdin: &mut ChildStdin, id: isize, content: RequestConte
     let request = BridgeRequest { id, content };
     let json = serde_json::to_string(&request).expect("Failed to encode request to JSON");
     let payload = format!("{}\n", json);
-    println!(">>> payload sent: {}", payload);
+    // println!(">>> payload sent: {}", payload);
     stdin
         .write_all(&payload.as_bytes())
         .await
@@ -304,7 +304,7 @@ async fn submit_request(stdin: &mut ChildStdin, id: isize, content: RequestConte
 }
 
 async fn process_response(bridge_manager: Addr<BridgeActor>, line: String) {
-    println!("line: {:?}", line);
+    // println!("line: {:?}", line);
     let response: BridgeResponse = serde_json::from_str(&line).expect("unable to decode json");
     let res = bridge_manager
         .send(GetChannelForId { id: response.id })
@@ -320,6 +320,6 @@ async fn process_response(bridge_manager: Addr<BridgeActor>, line: String) {
             sender.send(response.content).unwrap();
             ()
         }
-        ChannelForId::None => println!("oopsie"),
+        ChannelForId::None => println!("Channel error"),
     }
 }
