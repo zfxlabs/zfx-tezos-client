@@ -1,5 +1,3 @@
-use std::env;
-
 use serde_json::Value;
 
 use zfx_tezos_client::bridge::*;
@@ -8,7 +6,7 @@ use zfx_tezos_client::Result;
 use zfx_michelson::michelson::*;
 use zfx_tezos_client::prelude::*;
 
-use clap::{value_t, values_t, App, Arg};
+use clap::{App, Arg};
 
 fn main() -> Result<()> {
     let matches = App::new("zfx-tezos-client")

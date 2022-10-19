@@ -7,15 +7,18 @@ pub struct BridgeRequest {
     pub content: RequestContent,
 }
 
-// It seems more reasonable than working with nested enums, that have weird
-// tagging rules for deserialization.
+/// Container type for the response from the bridge
 #[derive(Clone, Debug, Deserialize)]
 pub struct BridgeResponse<T> {
     pub id: isize,
-    pub content: T, // String, // FIXME: this is a new type
+    pub content: T,
 }
 
-//#[derive(Clone, Debug, Serialize)]
+// This is a correct, but simplistic definition,
+// which works well for this library as the code is very generic,
+// users should convert and validate data when interacting with this library
+pub type MichelsonV1Expression = Value;
+
 pub type BigMapKey = String;
 
 #[derive(Clone, Debug, Serialize)]
@@ -69,23 +72,25 @@ pub enum TransactionResponse {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct TransactionMessage {
-    hash: String,
-    transactions: Vec<Transaction>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct Transaction {
-    entrypoint: String,
-    value: MichelsonV1Expression,
-}
-
-#[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "status")]
 #[allow(non_camel_case_types)]
 pub enum StorageResponse {
-    success { storage: Value }, //MichelsonV1Expression },
+    success { storage: MichelsonV1Expression },
     // The bridge docs say errors are strings, but sometimes they
     // send JSON structures as sub-maps in the error field
     error { error: Value },
+}
+
+/// Unused for the time being
+#[derive(Clone, Debug, Deserialize)]
+pub struct TransactionMessage {
+    pub hash: String,
+    pub transactions: Vec<Transaction>,
+}
+
+/// Unused for the time being
+#[derive(Clone, Debug, Deserialize)]
+pub struct Transaction {
+    pub entrypoint: String,
+    pub value: MichelsonV1Expression,
 }

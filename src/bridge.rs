@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
-use serde::Deserialize;
-
 use std::collections::HashMap;
+use std::process::Stdio;
 
 use include_dir::{include_dir, Dir};
 
@@ -12,7 +11,7 @@ use tokio::process::{ChildStdin, Command};
 use tokio::sync::broadcast;
 use tokio::sync::oneshot;
 
-use std::process::Stdio;
+const LISTEN_BUFFER_CAPACITY: usize = 128;
 
 static SCRIPTS_DIR: Dir<'_> = include_dir!("./scripts");
 static BUNDLE_NAME: &str = "tezos_js_bridge.bundle.js";
@@ -51,12 +50,6 @@ enum ChannelForId {
     Oneshot { sender: oneshot::Sender<Value> },
     Broadcast { sender: broadcast::Sender<Value> },
     None,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct BridgeResponse {
-    id: isize,
-    content: Value,
 }
 
 #[derive(Debug)]
@@ -118,7 +111,7 @@ impl Bridge {
             confirmation,
             destination,
             entrypoint,
-            payload, //: vec![], // FIXME
+            payload,
         };
         let (sender, receiver) = oneshot::channel::<Value>();
         let id = self
@@ -184,8 +177,7 @@ impl Bridge {
         confirmation: isize,
         destination: String,
     ) -> Result<broadcast::Receiver<Value>> {
-        let listen_buffer_capacity = 128; // FIXME: constant or config
-        let (sender, receiver) = broadcast::channel(listen_buffer_capacity);
+        let (sender, receiver) = broadcast::channel(LISTEN_BUFFER_CAPACITY);
         let id = self.addr.send(SubscribeToListen { sender }).await;
 
         let content = RequestContent::listen {
@@ -238,12 +230,10 @@ impl Actor for BridgeActor {
     type Context = Context<Self>;
 
     fn started(&mut self, _ctx: &mut Context<Self>) {
-        // println!("started bridge"); // TODO: remove
         ()
     }
 
     fn stopped(&mut self, _ctx: &mut Context<Self>) {
-        // println!("stopped bridge"); // TODO: remove
         ()
     }
 }
@@ -295,7 +285,6 @@ async fn submit_request(stdin: &mut ChildStdin, id: isize, content: RequestConte
     let request = BridgeRequest { id, content };
     let json = serde_json::to_string(&request).expect("Failed to encode request to JSON");
     let payload = format!("{}\n", json);
-    // println!(">>> payload sent: {}", payload);
     stdin
         .write_all(&payload.as_bytes())
         .await
@@ -304,8 +293,9 @@ async fn submit_request(stdin: &mut ChildStdin, id: isize, content: RequestConte
 }
 
 async fn process_response(bridge_manager: Addr<BridgeActor>, line: String) {
-    // println!("line: {:?}", line);
-    let response: BridgeResponse = serde_json::from_str(&line).expect("unable to decode json");
+    // TODO refine decoding logic to return something more specific than `Value`
+    let response: BridgeResponse<Value> =
+        serde_json::from_str(&line).expect("unable to decode json");
     let res = bridge_manager
         .send(GetChannelForId { id: response.id })
         .await

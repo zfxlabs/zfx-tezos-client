@@ -1,4 +1,4 @@
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 use zfx_tezos_client::bridge::*;
 use zfx_tezos_client::Result;
@@ -65,13 +65,15 @@ async fn get_storage(rpc_node: &String, contract_address: &String) {
         .await;
     println!("Received storage: {:?}", storage);
 
-
     let mut p = Parser::new();
-    let schema: Value = json!{ {"prim": "int" } };
+    let schema: Value = json! { {"prim": "int" } };
 
     match storage {
         Ok(StorageResponse::success { storage }) => {
-            let decoded_json = p.decode(storage, schema.clone()).await.expect("decoding failed (wrong storage schema?)");
+            let decoded_json = p
+                .decode(storage, schema.clone())
+                .await
+                .expect("decoding failed (wrong storage schema?)");
             let decoded_storage: i64 = from_wrapped_value(decoded_json).expect("int should be i64");
             println!("decoded storage: {:?}", decoded_storage);
         }
