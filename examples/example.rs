@@ -1,14 +1,8 @@
-/// Example retrieves contract storage through the bridge,
-/// and decodes it's content with the help of the storage's schema
-
-use serde_json::{json, Value};
+/// Example listenes to a contract on mainnet and prints transaction details
 
 use zfx_tezos_client::bridge::*;
 use zfx_tezos_client::Result;
-
-use zfx_michelson::*;
-use zfx_tezos_client::prelude::*;
-
+use zfx_michelson::michelson::*;
 use clap::{App, Arg};
 
 fn main() -> Result<()> {
@@ -34,26 +28,29 @@ fn main() -> Result<()> {
 
     let rpc_node = match matches.value_of("rpc-address") {
         Some(node_str) => node_str.to_string(),
-        _ => "https://ghostnet.tezos.marigold.dev/".to_string(),
+        _ => "https://rpc.tzstats.com".to_string(),
         // _ => "https://rpc.ghostnet.teztnets.xyz".to_string(),
     };
     println!("RPC url: {}", rpc_node);
 
+    // objkt.com Marketplace 2.0 contract
+    // https://tzstats.com/KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC
     let contract_address = match matches.value_of("contract-address") {
         Some(addr) => addr.to_string(),
-        _ => "KT1BK1AK8Xx1x7uwrFeKbpcaFKuYAZhruUzT".to_string(),
+        _ => "KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC".to_string(),
     };
     println!("Contract address: {}", contract_address);
 
     let sys = actix::System::new();
 
-    sys.block_on(async move { get_storage(&rpc_node, &contract_address).await });
+    sys.block_on(async move { sanity(&rpc_node, &contract_address).await });
 
+    sys.run().unwrap();
     Ok(())
 }
 
-async fn get_storage(rpc_node: &String, contract_address: &String) {
-    // Install
+async fn sanity(rpc_node: &String, contract_address: &String) {
+    //Install
     install_parser().await;
     install_bridge().await;
 
@@ -63,23 +60,25 @@ async fn get_storage(rpc_node: &String, contract_address: &String) {
 
     let contract_address = contract_address.to_string();
 
-    let storage = bridge
+    let storage1 = bridge
         .storage(rpc_node.clone(), confirmations, contract_address.clone())
         .await;
-    println!("Received storage: {:?}", storage);
+    println!("initial storage: {:?}", storage1);
 
-    let mut p = Parser::new();
-    let schema: Value = json! { {"prim": "int" } };
+    let mut listen = bridge
+        .subscribe(rpc_node.clone(), confirmations)
+        .await
+        .unwrap();
 
-    match storage {
-        Ok(StorageResponse::success { storage }) => {
-            let decoded_json = p
-                .decode(storage, schema.clone())
-                .await
-                .expect("decoding failed (wrong storage schema?)");
-            let decoded_storage: i64 = from_wrapped_value(decoded_json).expect("int should be i64");
-            println!("decoded storage: {:?}", decoded_storage);
-        }
-        _ => println!("not successful!"),
-    }
+    println!("listening!");
+
+    while let Ok(stuff) = listen.recv().await {
+        let dest = stuff.get("destination").unwrap().to_string().replace("\"", "");
+        if dest == contract_address {
+            println!("{}\n", serde_json::to_string_pretty(&stuff).unwrap());
+            println!("-------------------------------------------------\n");
+        }     
+    };
+
+    println!("ended");
 }
